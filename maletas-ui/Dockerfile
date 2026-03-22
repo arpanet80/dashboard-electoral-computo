@@ -3,7 +3,7 @@
 ################
 
 # Utilizamos una imagen base de Node.js para construir el proyecto
-FROM node:18 as builder
+FROM node:20-alpine AS builder
 
 # Establecer el directorio de trabajo para la etapa de construcción
 WORKDIR /app
