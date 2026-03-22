@@ -1,38 +1,30 @@
 services:
   api:
-    image: 10.51.15.42:5000/contrataciones-api:latest
-    container_name: contrataciones-api
+    image: 10.51.15.42:5000/maletas-api:latest
+    container_name: maletas-api
     ports:
       - "3003:3003"
     restart: always
     networks:
-      - contrataciones-net
+      - maletas-net
     environment:
-      POSTGRES_HOST: 10.51.15.101
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 'Pa$$Base2022'
-      POSTGRES_DB: ContratacionesDB
-      POSTGRES_PATH: ted
-      PORT: 3003
-      JWT_ACCESS_SECRET: Top_Secrets
+    #  POSTGRES_HOST: 10.51.15.101
+      PORT: 3009
 
   app:
-    image: 10.51.15.42:5000/contrataciones-ui:latest
-    container_name: contrataciones-ui
+    image: 10.51.15.42:5000/maletas-ui:latest
+    container_name: maletas-ui
     ports:
-      - "8569:80"
+      - "8571:80"
     restart: always
     depends_on:
       - api
     networks:
-      - contrataciones-net
+      - maletas-net
     environment:
-      API_URL: 'http://10.51.15.41:3003/'
-      API_URL_USER: 'http://10.51.15.41:3001/'
-      REPORTS_URL: 'http://10.51.15.110:8123/api/reports/'
+      API_URL: 'http://10.51.15.41:3009/'
 
 networks:
-  contrataciones-net:
+  maletas-net:
     driver: bridge
-    name: contrataciones-net
+    name: maletas-net
