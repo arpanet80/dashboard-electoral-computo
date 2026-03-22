@@ -1,0 +1,73 @@
+{
+  "tabla_1": [
+    {
+      "Concepto": "Jurados Notificados",
+      "Cantidad": "185,904",
+      "%": "87.9%"
+    },
+    {
+      "Concepto": "Jurados Capacitados",
+      "Cantidad": "162,993",
+      "%": "77.1%"
+    },
+    {
+      "Concepto": "Estipendios Pagados",
+      "Cantidad": "7,124",
+      "%": "3.4%"
+    },
+    {
+      "Concepto": "Excusas Aprobadas",
+      "Cantidad": "11,638",
+      "%": "-"
+    },
+    {
+      "Concepto": "Total de Jurados Sorteados",
+      "Cantidad": "211,519",
+      "%": "-"
+    }
+  ],
+  "tabla_2": [
+    {
+      "Concepto": "Maletas del CDL",
+      "Cantidad": "35,188",
+      "%": "99.8%"
+    },
+    {
+      "Concepto": "Maletas Resguardadas",
+      "Cantidad": "35,083",
+      "%": "99.5%"
+    },
+    {
+      "Concepto": "Maletas Entregadas",
+      "Cantidad": "35,095",
+      "%": "99.6%"
+    },
+    {
+      "Concepto": "Total de Maletas",
+      "Cantidad": "35,253",
+      "%": "-"
+    }
+  ],
+  "tabla_3": [
+    {
+      "Concepto": "Mesas Iniciadas",
+      "Cantidad": "35,151",
+      "%": "99.7%"
+    },
+    {
+      "Concepto": "Mesas Cerradas",
+      "Cantidad": "35,124",
+      "%": "99.6%"
+    },
+    {
+      "Concepto": "Sobres A Recibidos",
+      "Cantidad": "34,741",
+      "%": "98.5%"
+    },
+    {
+      "Concepto": "Total de Mesas",
+      "Cantidad": "35,253",
+      "%": "-"
+    }
+  ]
+}

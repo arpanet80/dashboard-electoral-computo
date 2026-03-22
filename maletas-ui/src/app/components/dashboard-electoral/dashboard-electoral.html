@@ -1,0 +1,478 @@
+<div class="dash-root" [class.light]="!isDark">
+
+  <!-- ═══════════════════════ TOPBAR ════════════════════════════════════════ -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-icon">🗳️</span>
+      <div>
+        <h1 class="brand-title">Dashboard Electoral</h1>
+        <p class="brand-sub">Potosí · Monitoreo en tiempo real</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="update-badge" *ngIf="lastUpdate">
+        <span class="pulse-dot"></span>
+        {{ lastUpdate | date:'HH:mm:ss' }}
+      </span>
+      <!-- Theme switcher -->
+      <button class="theme-switcher" (click)="toggleTheme()" [title]="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+        <span class="theme-track">
+          <span class="theme-thumb">
+            <span class="theme-icon">{{ isDark ? '🌙' : '☀️' }}</span>
+          </span>
+        </span>
+        <span class="theme-label">{{ isDark ? 'Oscuro' : 'Claro' }}</span>
+      </button>
+      <button class="btn-refresh" (click)="loadData()" [disabled]="loading || isRefreshing">
+        <span class="btn-icon" [class.spinning]="loading || isRefreshing">↻</span>
+        {{ (loading || isRefreshing) ? 'Actualizando…' : 'Actualizar' }}
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ LOADING ═══════════════════════════════════════ -->
+  <div *ngIf="loading && !resumen" class="full-loader">
+    <div class="loader-ring"></div>
+    <p>Cargando datos electorales…</p>
+  </div>
+
+  <!-- ═══════════════════════ ERROR ═════════════════════════════════════════ -->
+  <div *ngIf="error" class="error-banner">
+    <span>⚠️</span>
+    <div>
+      <strong>No se pudo cargar la información</strong>
+      <p>{{ error }}</p>
+    </div>
+    <button (click)="loadData()" class="btn-retry">Reintentar</button>
+  </div>
+
+  <!-- ═══════════════════════ MAIN CONTENT ══════════════════════════════════ -->
+  <main *ngIf="resumen && !loading" class="dash-body">
+
+    <!-- ── FUENTES disponibles ─────────────────────────────────────────── -->
+    <div class="sources-row">
+      <div class="source-chip" [class.active]="hasMaletasData()">
+        <span>📦</span> Maletas
+        <span class="chip-status">{{ hasMaletasData() ? 'OK' : 'Sin datos' }}</span>
+      </div>
+      <div class="source-chip" [class.active]="hasMonitoreoData()">
+        <span>📡</span> Monitoreo
+        <span class="chip-status">{{ hasMonitoreoData() ? 'OK' : 'Sin datos' }}</span>
+      </div>
+      <div class="source-chip total-chip">
+        <span>🗳️</span>
+        <span>Total mesas habilitadas:</span>
+        <strong>{{ formatNumber(totalMesas || totalMesasMonitoreo) }}</strong>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!--  SECCIÓN 1 · DONUTS DE MONITOREO                                  -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <section class="section" *ngIf="hasMonitoreoData()">
+      <div class="section-label">
+        <span class="section-dot purple"></span>
+        Operaciones de Votación · Monitoreo
+      </div>
+
+      <div class="donuts-grid">
+
+        <!-- Apertura de Mesa -->
+        <div class="donut-card">
+          <div class="donut-header purple-grad">
+            <span class="donut-icon">✅</span>
+            <span>Apertura de Mesas</span>
+          </div>
+          <div class="donut-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 120 120" class="donut-svg">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#e2e8f0" stroke-width="12"/>
+                <circle cx="60" cy="60" r="52" fill="none"
+                  [attr.stroke]="getDonutColor(getPercentage(aperturaMesa, totalMesasMonitoreo))"
+                  stroke-width="12"
+                  stroke-linecap="round"
+                  [attr.stroke-dasharray]="getDonutDasharray(aperturaMesa, totalMesasMonitoreo)"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 60 60)"/>
+              </svg>
+              <div class="donut-center-label">
+                <span class="donut-pct">{{ getPercentage(aperturaMesa, totalMesasMonitoreo) }}%</span>
+                <span class="donut-sublabel">Apertura</span>
+              </div>
+            </div>
+            <div class="donut-stats">
+              <div class="dstat">
+                <span class="dstat-val">{{ formatNumber(aperturaMesa) }}</span>
+                <span class="dstat-key">Abiertas</span>
+              </div>
+              <div class="dstat-div"></div>
+              <div class="dstat red">
+                <span class="dstat-val">{{ formatNumber(totalMesasMonitoreo - aperturaMesa) }}</span>
+                <span class="dstat-key">Pendientes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cierre de Mesa -->
+        <div class="donut-card">
+          <div class="donut-header indigo-grad">
+            <span class="donut-icon">🔒</span>
+            <span>Cierre de Mesas</span>
+          </div>
+          <div class="donut-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 120 120" class="donut-svg">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#e2e8f0" stroke-width="12"/>
+                <circle cx="60" cy="60" r="52" fill="none"
+                  [attr.stroke]="getDonutColor(getPercentage(cierreMesa, totalMesasMonitoreo))"
+                  stroke-width="12"
+                  stroke-linecap="round"
+                  [attr.stroke-dasharray]="getDonutDasharray(cierreMesa, totalMesasMonitoreo)"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 60 60)"/>
+              </svg>
+              <div class="donut-center-label">
+                <span class="donut-pct">{{ getPercentage(cierreMesa, totalMesasMonitoreo) }}%</span>
+                <span class="donut-sublabel">Cierre</span>
+              </div>
+            </div>
+            <div class="donut-stats">
+              <div class="dstat">
+                <span class="dstat-val">{{ formatNumber(cierreMesa) }}</span>
+                <span class="dstat-key">Cerradas</span>
+              </div>
+              <div class="dstat-div"></div>
+              <div class="dstat red">
+                <span class="dstat-val">{{ formatNumber(totalMesasMonitoreo - cierreMesa) }}</span>
+                <span class="dstat-key">Pendientes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recepción Sobre A -->
+        <div class="donut-card">
+          <div class="donut-header teal-grad">
+            <span class="donut-icon">📜</span>
+            <span>Recepción Sobre A</span>
+          </div>
+          <div class="donut-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 120 120" class="donut-svg">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#e2e8f0" stroke-width="12"/>
+                <circle cx="60" cy="60" r="52" fill="none"
+                  [attr.stroke]="getDonutColor(getPercentage(recepcionSobreA, totalMesasMonitoreo))"
+                  stroke-width="12"
+                  stroke-linecap="round"
+                  [attr.stroke-dasharray]="getDonutDasharray(recepcionSobreA, totalMesasMonitoreo)"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 60 60)"/>
+              </svg>
+              <div class="donut-center-label">
+                <span class="donut-pct">{{ getPercentage(recepcionSobreA, totalMesasMonitoreo) }}%</span>
+                <span class="donut-sublabel">Recibidos</span>
+              </div>
+            </div>
+            <div class="donut-stats">
+              <div class="dstat">
+                <span class="dstat-val">{{ formatNumber(recepcionSobreA) }}</span>
+                <span class="dstat-key">Recibidos</span>
+              </div>
+              <div class="dstat-div"></div>
+              <div class="dstat red">
+                <span class="dstat-val">{{ formatNumber(totalMesasMonitoreo - recepcionSobreA) }}</span>
+                <span class="dstat-key">Pendientes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!--  SECCIÓN 2 · MALETAS — BARRAS DE PROGRESO                        -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <section class="section" *ngIf="hasMaletasData()">
+      <div class="section-label">
+        <span class="section-dot blue"></span>
+        Entrega y Devolución de Maletas Electorales
+      </div>
+
+      <div class="maletas-grid">
+
+        <!-- Entregadas (= Producidas en API) -->
+        <div class="maleta-card">
+          <div class="maleta-card-top">
+            <div class="maleta-icon blue-icon">📦</div>
+            <div>
+              <div class="maleta-title">Maletas Entregadas</div>
+              <div class="maleta-subtitle">Producidas y distribuidas</div>
+            </div>
+            <div class="maleta-pct blue-text">
+              {{ getPercentage(totalEntregadas, totalMesas) }}%
+            </div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill"
+              [style.width]="getBarWidth(totalEntregadas, totalMesas)"
+              [style.background]="getBarColor(totalEntregadas, totalMesas)">
+            </div>
+          </div>
+          <div class="maleta-nums">
+            <span class="num-done">{{ formatNumber(totalEntregadas) }} entregadas</span>
+            <span class="num-pend">{{ formatNumber(faltanEntregadas) }} pendientes</span>
+          </div>
+        </div>
+
+        <!-- Devueltas (= Deueltas en API) -->
+        <div class="maleta-card">
+          <div class="maleta-card-top">
+            <div class="maleta-icon purple-icon">↩️</div>
+            <div>
+              <div class="maleta-title">Maletas Devueltas</div>
+              <div class="maleta-subtitle">Retorno confirmado</div>
+            </div>
+            <div class="maleta-pct purple-text">
+              {{ getPercentage(totalDevueltas, totalMesas) }}%
+            </div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill"
+              [style.width]="getBarWidth(totalDevueltas, totalMesas)"
+              [style.background]="getBarColor(totalDevueltas, totalMesas)">
+            </div>
+          </div>
+          <div class="maleta-nums">
+            <span class="num-done">{{ formatNumber(totalDevueltas) }} devueltas</span>
+            <span class="num-pend">{{ formatNumber(faltanDevueltas) }} pendientes</span>
+          </div>
+        </div>
+
+        <!-- Sobre A -->
+        <div class="maleta-card">
+          <div class="maleta-card-top">
+            <div class="maleta-icon amber-icon">📋</div>
+            <div>
+              <div class="maleta-title">Sobres A Recibidos</div>
+              <div class="maleta-subtitle">Acta electoral procesada</div>
+            </div>
+            <div class="maleta-pct amber-text">
+              {{ getPercentage(totalSobreA, totalMesas) }}%
+            </div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill"
+              [style.width]="getBarWidth(totalSobreA, totalMesas)"
+              [style.background]="getBarColor(totalSobreA, totalMesas)">
+            </div>
+          </div>
+          <div class="maleta-nums">
+            <span class="num-done">{{ formatNumber(totalSobreA) }} recibidos</span>
+            <span class="num-pend">{{ formatNumber(faltanSobreA) }} pendientes</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!--  SECCIÓN 3 · KPIs DE MONITOREO                                   -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <section class="section" *ngIf="hasMonitoreoData()">
+      <div class="section-label">
+        <span class="section-dot teal"></span>
+        Indicadores de Monitoreo Electoral
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card" *ngFor="let kpi of kpisMonitoreo">
+          <div class="kpi-icon">{{ kpi.icon }}</div>
+          <div class="kpi-val">{{ formatNumber(kpi.value) }}</div>
+          <div class="kpi-label">{{ kpi.label }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!--  SECCIÓN 4 · TABLA DE JURADOS                                    -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <section class="section" *ngIf="hasMonitoreoData()">
+      <div class="section-label">
+        <span class="section-dot amber"></span>
+        Estado de Jurados Electorales
+      </div>
+
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Concepto</th>
+              <th>Cantidad</th>
+              <th>Sobre total de mesas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of tablaJurados">
+              <td>
+                <span class="row-dot" [style.background]="row.color"></span>
+                {{ row.concepto }}
+              </td>
+              <td class="num-cell">{{ formatNumber(row.valor) }}</td>
+              <td class="bar-cell">
+                <div class="inline-bar-track">
+                  <div class="inline-bar-fill"
+                    [style.width]="getBarWidth(row.valor, totalMesasMonitoreo)"
+                    [style.background]="row.color">
+                  </div>
+                </div>
+                <span class="inline-pct">{{ getPercentage(row.valor, totalMesasMonitoreo) }}%</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!--  SECCIÓN 5 · TABLA COMPARATIVA MALETAS vs MONITOREO              -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <section class="section" *ngIf="hasMaletasData() && hasMonitoreoData()">
+      <div class="section-label">
+        <span class="section-dot slate"></span>
+        Comparativo: Maletas vs Monitoreo
+      </div>
+
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Indicador</th>
+              <th>Fuente</th>
+              <th>Valor</th>
+              <th>Total ref.</th>
+              <th>Avance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="row-dot" style="background:#3b82f6"></span>Mesas habilitadas</td>
+              <td><span class="badge blue-badge">Maletas</span></td>
+              <td class="num-cell">{{ formatNumber(totalMesas) }}</td>
+              <td class="num-cell">—</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><span class="row-dot" style="background:#3b82f6"></span>Maletas entregadas</td>
+              <td><span class="badge blue-badge">Maletas</span></td>
+              <td class="num-cell">{{ formatNumber(totalEntregadas) }}</td>
+              <td class="num-cell">{{ formatNumber(totalMesas) }}</td>
+              <td class="bar-cell">
+                <div class="inline-bar-track">
+                  <div class="inline-bar-fill"
+                    [style.width]="getBarWidth(totalEntregadas, totalMesas)"
+                    [style.background]="getBarColor(totalEntregadas, totalMesas)">
+                  </div>
+                </div>
+                <span class="inline-pct">{{ getPercentage(totalEntregadas, totalMesas) }}%</span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="row-dot" style="background:#8b5cf6"></span>Maletas devueltas</td>
+              <td><span class="badge blue-badge">Maletas</span></td>
+              <td class="num-cell">{{ formatNumber(totalDevueltas) }}</td>
+              <td class="num-cell">{{ formatNumber(totalMesas) }}</td>
+              <td class="bar-cell">
+                <div class="inline-bar-track">
+                  <div class="inline-bar-fill"
+                    [style.width]="getBarWidth(totalDevueltas, totalMesas)"
+                    [style.background]="getBarColor(totalDevueltas, totalMesas)">
+                  </div>
+                </div>
+                <span class="inline-pct">{{ getPercentage(totalDevueltas, totalMesas) }}%</span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="row-dot" style="background:#f59e0b"></span>Sobres A (maletas)</td>
+              <td><span class="badge blue-badge">Maletas</span></td>
+              <td class="num-cell">{{ formatNumber(totalSobreA) }}</td>
+              <td class="num-cell">{{ formatNumber(totalMesas) }}</td>
+              <td class="bar-cell">
+                <div class="inline-bar-track">
+                  <div class="inline-bar-fill"
+                    [style.width]="getBarWidth(totalSobreA, totalMesas)"
+                    [style.background]="getBarColor(totalSobreA, totalMesas)">
+                  </div>
+                </div>
+                <span class="inline-pct">{{ getPercentage(totalSobreA, totalMesas) }}%</span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="row-dot" style="background:#10b981"></span>Apertura de mesas</td>
+              <td><span class="badge purple-badge">Monitoreo</span></td>
+              <td class="num-cell">{{ formatNumber(aperturaMesa) }}</td>
+              <td class="num-cell">{{ formatNumber(totalMesasMonitoreo) }}</td>
+              <td class="bar-cell">
+                <div class="inline-bar-track">
+                  <div class="inline-bar-fill"
+                    [style.width]="getBarWidth(aperturaMesa, totalMesasMonitoreo)"
+                    [style.background]="getBarColor(aperturaMesa, totalMesasMonitoreo)">
+                  </div>
+                </div>
+                <span class="inline-pct">{{ getPercentage(aperturaMesa, totalMesasMonitoreo) }}%</span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="row-dot" style="background:#6366f1"></span>Cierre de mesas</td>
+              <td><span class="badge purple-badge">Monitoreo</span></td>
+              <td class="num-cell">{{ formatNumber(cierreMesa) }}</td>
+              <td class="num-cell">{{ formatNumber(totalMesasMonitoreo) }}</td>
+              <td class="bar-cell">
+                <div class="inline-bar-track">
+                  <div class="inline-bar-fill"
+                    [style.width]="getBarWidth(cierreMesa, totalMesasMonitoreo)"
+                    [style.background]="getBarColor(cierreMesa, totalMesasMonitoreo)">
+                  </div>
+                </div>
+                <span class="inline-pct">{{ getPercentage(cierreMesa, totalMesasMonitoreo) }}%</span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="row-dot" style="background:#14b8a6"></span>Sobres A (notario)</td>
+              <td><span class="badge purple-badge">Monitoreo</span></td>
+              <td class="num-cell">{{ formatNumber(recepcionSobreA) }}</td>
+              <td class="num-cell">{{ formatNumber(totalMesasMonitoreo) }}</td>
+              <td class="bar-cell">
+                <div class="inline-bar-track">
+                  <div class="inline-bar-fill"
+                    [style.width]="getBarWidth(recepcionSobreA, totalMesasMonitoreo)"
+                    [style.background]="getBarColor(recepcionSobreA, totalMesasMonitoreo)">
+                  </div>
+                </div>
+                <span class="inline-pct">{{ getPercentage(recepcionSobreA, totalMesasMonitoreo) }}%</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer de metadatos -->
+    <footer class="meta-footer" *ngIf="resumen?.metadata">
+      <span>Depto: <strong>{{ resumen!.metadata.departamento }}</strong></span>
+      <span>·</span>
+      <span>Generado: <strong>{{ resumen!.metadata.timestamp | date:'medium' }}</strong></span>
+      <span>·</span>
+      <span>Fuente Maletas: <strong>{{ resumen!.metadata.fuentes.maletas ? '✅' : '❌' }}</strong></span>
+      <span>Fuente Monitoreo: <strong>{{ resumen!.metadata.fuentes.monitoreo ? '✅' : '❌' }}</strong></span>
+    </footer>
+
+  </main>
+
+  <!-- Overlay de refresco silencioso -->
+  <div *ngIf="isRefreshing" class="silent-refresh">
+    <span class="refresh-dot"></span> Actualizando datos…
+  </div>
+
+</div>

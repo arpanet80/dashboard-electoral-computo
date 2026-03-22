@@ -1,0 +1,24 @@
+[
+  {
+    "agrupacion": "BOLIVIA",
+    "idPaisAgrupado": 32,
+    "cantidadNotificacion": 13391,
+    "cantidadCapacitacion": 11897,
+    "cantidadEstipendio": 0,
+    "recepcionMaletaCdl": 2377,
+    "resguardoMaletaRecintoElectoral": 2377,
+    "entregaMaletaJuradoElectoral": 2377,
+    "aperturaMesa": 2377,
+    "cierreMesa": 2377,
+    "noAperturaMesa": 0,
+    "recepcionSobreAPorNotario": 2377,
+    "juradoSorteado": 13488,
+    "juradoExcusado": 774,
+    "juradoDeLaFila": 0,
+    "totalEstadosJurados": 25288,
+    "totalMaletas": 14262,
+    "totalEtapaJuradoElegidos": 14262,
+    "totalMesas": 2377,
+    "usuarioRegistro": "dante.ibanez"
+  }
+]
