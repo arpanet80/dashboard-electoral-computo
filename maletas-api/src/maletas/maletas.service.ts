@@ -13,6 +13,7 @@ export class MaletasService {
     rejectUnauthorized: false
   });
 
+
   private axiosInstance = axios.default.create({
     httpsAgent: this.httpsAgent,
     timeout: 30000,
@@ -24,6 +25,7 @@ export class MaletasService {
     maxRedirects: 5
   });
 
+  
   async login(credentials: { username: string; password: string }) {
     try {
       console.log('🔐 Iniciando proceso de login para:', credentials.username);

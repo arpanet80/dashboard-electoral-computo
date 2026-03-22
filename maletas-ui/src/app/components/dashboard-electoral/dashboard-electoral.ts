@@ -19,10 +19,12 @@ export class DashboardElectoralComponent implements OnInit, OnDestroy {
   isRefreshing = false;
   isDark = true;
 
+  // Toogle de tema oscuro y claro
   toggleTheme() {
     this.isDark = !this.isDark;
   }
 
+  
   private refreshSubscription: Subscription | null = null;
 
   // Circunferencia del donut: 2π * r = 2π * 52 ≈ 326.73
