@@ -30,13 +30,13 @@
     </div>
   </header>
 
-  <!-- ═══════════════════════ LOADING ═══════════════════════════════════════ -->
-  <div *ngIf="loading && !resumen" class="full-loader">
+  <!-- Loading State — oculto con CSS, no destruido, para no resetear el scroll -->
+  <div [class.hidden]="!loading || resumen" class="full-loader">
     <div class="loader-ring"></div>
     <p>Cargando datos electorales…</p>
   </div>
 
-  <!-- ═══════════════════════ ERROR ═════════════════════════════════════════ -->
+  <!-- Error State -->
   <div *ngIf="error" class="error-banner">
     <span>⚠️</span>
     <div>
@@ -46,8 +46,8 @@
     <button (click)="loadData()" class="btn-retry">Reintentar</button>
   </div>
 
-  <!-- ═══════════════════════ MAIN CONTENT ══════════════════════════════════ -->
-  <main *ngIf="resumen && !loading" class="dash-body">
+  <!-- Main Content — siempre en el DOM, invisible hasta tener datos -->
+  <main class="dash-body" [class.hidden]="!resumen">
 
     <!-- ── FUENTES disponibles ─────────────────────────────────────────── -->
     <div class="sources-row">

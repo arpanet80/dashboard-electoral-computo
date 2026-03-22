@@ -45,10 +45,12 @@ export class DashboardElectoralComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response) => {
+          const scrollY = window.scrollY;
           this.resumen = response.data;
           this.lastUpdate = new Date();
           this.isRefreshing = false;
           this.error = null;
+          setTimeout(() => window.scrollTo({ top: scrollY, behavior: 'instant' }), 0);
         },
         error: (err) => {
           this.error = err.message;
@@ -58,15 +60,19 @@ export class DashboardElectoralComponent implements OnInit, OnDestroy {
   }
 
   loadData() {
+    // Guardar posición del scroll antes de actualizar
+    const scrollY = window.scrollY;
+
     this.loading = true;
     this.error = null;
 
     this.maletasService.getResumenGeneral().subscribe({
       next: (response) => {
-        console.log("🚀 ~ DashboardElectoralComponent ~ loadData ~ response:", response)
         this.resumen = response.data;
         this.lastUpdate = new Date();
         this.loading = false;
+        // Restaurar posición del scroll después de que Angular actualice la vista
+        setTimeout(() => window.scrollTo({ top: scrollY, behavior: 'instant' }), 0);
       },
       error: (err) => {
         this.error = err.message;
